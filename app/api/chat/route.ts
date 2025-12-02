@@ -1,5 +1,6 @@
 // function that responds to POST requests at /api/chat
 
+import { db } from '@/db/db';
 import { openai } from '@ai-sdk/openai'
 import { streamText, UIMessage, convertToModelMessages, tool, stepCountIs } from 'ai';
 import { z } from 'zod';
@@ -12,6 +13,8 @@ export async function POST(req: Request) {
 
   //system prompt to instruct the model to use the tool
   const system_prompt = `You are an expert SQL assistant that helps user to query their database using natural language.
+
+  ${new Date().toLocaleString('sv-SE')}
   You have access to following tools:
   1. db tool - call this tool to query the database.
   2.schema tool - call this tool to get the database schema which will help you to write sql queries.
@@ -19,13 +22,14 @@ export async function POST(req: Request) {
 Rules:
 - Generate only SELECT queries (no INSERT, UPDATE, DELETE, DROP)
 - Always use the schema provided by the schema tool
-- Return valid SQLite syntax
+- Pass in valid SQL syntax indb tool.
+-IMPORTANT: To query database call db tool, Don't return just SQL query, use the tool.
 
 Always respond in a helpful, conversational tone while being technically accurate.
 `;
 
   const result = streamText({
-    model: openai('gpt-4o-mini'),
+    model: openai('gpt-5-nano-2025-08-07'),
     messages: convertToModelMessages(messages),
     system: system_prompt,
     stopWhen: stepCountIs(5),
@@ -62,9 +66,9 @@ CREATE TABLE sales (
         }),
         execute: async ({ query }) => {
           console.log('Query', query);
-          //make db call and uska result return karna hai taki hum frontend pe dekh sake.
-
-          return query;
+          //execute raw query from the db
+          return await db.run(query);
+          //this is very sensitive part
         },
       }),
     },
