@@ -29,7 +29,7 @@ export default function Chat() {
             {messages.length === 0 ? (
               <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                 <p>No messages yet. Start by asking a question about your data.</p>
-                <p className="text-sm mt-2">Example: Show me all users from last month</p>
+                <p className="text-sm mt-2">Example: Show me all users from last months</p>
               </div>
             ) : (
               messages.map(message => (
